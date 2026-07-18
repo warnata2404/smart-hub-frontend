@@ -1,12 +1,22 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import AuthService from "../../services/AuthService";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
   const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -15,17 +25,31 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError("");
     setLoading(true);
 
-    // Integrasi API akan dilakukan pada FE-2C
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await AuthService.login(form);
 
-      alert("Login API akan diimplementasikan pada FE-2C");
-    }, 800);
+      const token = response.data.token;
+
+      const userResponse = await AuthService.user();
+
+      login(userResponse.data.data, token);
+
+      navigate("/dashboard");
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Login gagal.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,8 +65,10 @@ export default function Login() {
 
               <h2 className="mt-3 fw-bold">Smart Hub</h2>
 
-              <p className="text-muted mb-0">Management System</p>
+              <p className="text-muted">Management System</p>
             </div>
+
+            {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -50,11 +76,10 @@ export default function Login() {
 
                 <input
                   type="email"
-                  className="form-control"
                   name="email"
+                  className="form-control"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="Masukkan email"
                   required
                 />
               </div>
@@ -64,11 +89,10 @@ export default function Login() {
 
                 <input
                   type="password"
-                  className="form-control"
                   name="password"
+                  className="form-control"
                   value={form.password}
                   onChange={handleChange}
-                  placeholder="Masukkan password"
                   required
                 />
               </div>
@@ -80,11 +104,7 @@ export default function Login() {
               >
                 {loading ? (
                   <>
-                    <span
-                      className="spinner-border spinner-border-sm me-2"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
                     Processing...
                   </>
                 ) : (
