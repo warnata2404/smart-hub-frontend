@@ -1,10 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import GuestLayout from "../layouts/GuestLayout";
 import MainLayout from "../layouts/MainLayout";
 
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
+import EquipmentCreate from "../pages/equipment/EquipmentCreate";
+import EquipmentEdit from "../pages/equipment/EquipmentEdit";
 import EquipmentList from "../pages/equipment/EquipmentList";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -35,7 +37,12 @@ export default function AppRoutes() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+
           <Route path="/equipments" element={<EquipmentList />} />
+
+          <Route path="/equipments/create" element={<EquipmentCreate />} />
+
+          <Route path="/equipments/:id/edit" element={<EquipmentEdit />} />
         </Route>
 
         {/* Fallback Route */}

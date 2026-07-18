@@ -1,4 +1,26 @@
+import { Link } from "react-router-dom";
+import Pagination from "../../components/common/Pagination";
+import useEquipments from "../../hooks/useEquipments";
+
 export default function EquipmentList() {
+  const {
+    equipments,
+    loading,
+    error,
+    refresh,
+    meta,
+    page,
+    setPage,
+    search,
+    setSearch,
+  } = useEquipments();
+
+  const handleRefresh = () => {
+    setSearch("");
+    setPage(1);
+    refresh();
+  };
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -10,10 +32,10 @@ export default function EquipmentList() {
           </p>
         </div>
 
-        <button className="btn btn-primary">
+        <Link to="/equipments/create" className="btn btn-primary">
           <i className="bi bi-plus-circle me-2"></i>
           Add Equipment
-        </button>
+        </Link>
       </div>
 
       <div className="card shadow-sm border-0">
@@ -23,45 +45,101 @@ export default function EquipmentList() {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search equipment..."
+                placeholder="Search by code, name, condition, or status..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
             <div className="col-md-6 text-md-end mt-3 mt-md-0">
-              <button className="btn btn-outline-secondary">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={handleRefresh}
+              >
                 <i className="bi bi-arrow-clockwise me-2"></i>
                 Refresh
               </button>
             </div>
           </div>
 
-          <div className="table-responsive">
-            <table className="table table-hover align-middle">
-              <thead className="table-light">
-                <tr>
-                  <th>ID</th>
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
 
-                  <th>Name</th>
+              <p className="mt-3 mb-0">Loading equipment data...</p>
+            </div>
+          )}
 
-                  <th>Category</th>
+          {!loading && error && (
+            <div className="alert alert-danger">{error}</div>
+          )}
 
-                  <th>Status</th>
+          {!loading && !error && (
+            <>
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Quantity</th>
+                      <th>Available</th>
+                      <th>Condition</th>
+                      <th>Status</th>
+                      <th width="150">Action</th>
+                    </tr>
+                  </thead>
 
-                  <th>Location</th>
+                  <tbody>
+                    {equipments.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="text-center py-5 text-muted">
+                          No equipment data available.
+                        </td>
+                      </tr>
+                    ) : (
+                      equipments.map((equipment) => (
+                        <tr key={equipment.id}>
+                          <td>{equipment.id}</td>
+                          <td>{equipment.code}</td>
+                          <td>{equipment.name}</td>
+                          <td>{equipment.quantity}</td>
+                          <td>{equipment.available_quantity}</td>
+                          <td>{equipment.condition}</td>
+                          <td>{equipment.status}</td>
 
-                  <th width="160">Action</th>
-                </tr>
-              </thead>
+                          <td>
+                            <Link
+                              to={`/equipments/${equipment.id}/edit`}
+                              className="btn btn-sm btn-outline-primary me-2"
+                            >
+                              Edit
+                            </Link>
 
-              <tbody>
-                <tr>
-                  <td colSpan="6" className="text-center py-5 text-muted">
-                    No equipment data available.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-danger"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                currentPage={page}
+                lastPage={meta?.last_page ?? 1}
+                onPageChange={setPage}
+              />
+            </>
+          )}
         </div>
       </div>
     </>
