@@ -34,18 +34,16 @@ export default function Login() {
     try {
       const response = await AuthService.login(form);
 
-      const token = response.data.token;
+      login(response.data.user, response.data.token);
 
-      const userResponse = await AuthService.user();
-
-      login(userResponse.data.data, token);
-
-      navigate("/dashboard");
+      navigate("/dashboard", {
+        replace: true,
+      });
     } catch (err) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError("Login gagal.");
+        setError("Unable to connect to server.");
       }
     } finally {
       setLoading(false);
@@ -61,7 +59,7 @@ export default function Login() {
               <i
                 className="bi bi-shield-lock-fill text-primary"
                 style={{ fontSize: "4rem" }}
-              ></i>
+              />
 
               <h2 className="mt-3 fw-bold">Smart Hub</h2>
 
@@ -105,7 +103,7 @@ export default function Login() {
                 {loading ? (
                   <>
                     <span className="spinner-border spinner-border-sm me-2"></span>
-                    Processing...
+                    Signing In...
                   </>
                 ) : (
                   <>
